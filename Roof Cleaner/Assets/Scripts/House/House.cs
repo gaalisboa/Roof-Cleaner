@@ -63,7 +63,7 @@ public class House : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        while(transform.eulerAngles.y != _roofs[0].TurnAngle)
+        while (transform.eulerAngles.y != _roofs[0].TurnAngle)
         {
             transform.eulerAngles = Vector3.MoveTowards(transform.eulerAngles,
                 new Vector3(transform.eulerAngles.x, _roofs[0].TurnAngle, transform.eulerAngles.z),

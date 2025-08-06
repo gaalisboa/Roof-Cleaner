@@ -1,19 +1,29 @@
-using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Renderer))]
 public class Clean : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
 
-    [SerializeField] private Texture2D _dirtMaskBase;
-    [SerializeField] private Texture2D _brush;
+    [Header("Textures")]
+    [SerializeField] private Texture2D _dirtMaskBase; // precisa ser toda verde (G=1)
+    [SerializeField] private Texture2D _brush;        // precisa ter canal G com variação (0~1)
 
-    [SerializeField] private Material _material;
+    [Header("Material Template")]
+    [SerializeField] private Material _materialTemplate; // Material com shader que usa "_DirtMask"
 
-    private Texture2D _templateDirtMask;
+    private Material _materialInstance;
+    private Texture2D _dirtMaskInstance;
 
     private void Start()
     {
+        // Clona o material original (evita compartilhamento entre objetos)
+        _materialInstance = new Material(_materialTemplate);
+
+        // Aplica o material no renderer deste objeto
+        GetComponent<Renderer>().material = _materialInstance;
+
+        // Cria uma nova textura copiando a base (também única para este objeto)
         CreateTexture();
     }
 
@@ -21,37 +31,52 @@ public class Clean : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
+            // Lança um raio da câmera para onde o mouse está
             if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit))
             {
-                Vector2 textureCoord = hit.textureCoord;
+                // Garante que foi este objeto que recebeu o clique
+                if (hit.collider.gameObject != gameObject) return;
 
-                int pixelX = (int)(textureCoord.x * _templateDirtMask.width);
-                int pixelY = (int)(textureCoord.y * _templateDirtMask.height);
+                Vector2 uv = hit.textureCoord;
+
+                int pixelX = (int)(uv.x * _dirtMaskInstance.width);
+                int pixelY = (int)(uv.y * _dirtMaskInstance.height);
+
+                int startX = pixelX - _brush.width / 2;
+                int startY = pixelY - _brush.height / 2;
 
                 for (int x = 0; x < _brush.width; x++)
                 {
                     for (int y = 0; y < _brush.height; y++)
                     {
-                        Color pixelDirt = _brush.GetPixel(x, y);
-                        Color pixelDirtMask = _templateDirtMask.GetPixel(pixelX + x, pixelY + y);
+                        int targetX = startX + x;
+                        int targetY = startY + y;
 
-                        _templateDirtMask.SetPixel(pixelX + x,
-                            pixelY + y,
-                            new Color(0, pixelDirtMask.g * pixelDirt.g, 0));
+                        if (targetX >= 0 && targetX < _dirtMaskInstance.width &&
+                            targetY >= 0 && targetY < _dirtMaskInstance.height)
+                        {
+                            Color brushPixel = _brush.GetPixel(x, y);
+                            Color maskPixel = _dirtMaskInstance.GetPixel(targetX, targetY);
+
+                            float newG = maskPixel.g - brushPixel.g;
+                            newG = Mathf.Clamp01(newG);
+
+                            _dirtMaskInstance.SetPixel(targetX, targetY, new Color(0, newG, 0));
+                        }
                     }
                 }
 
-                _templateDirtMask.Apply();
+                _dirtMaskInstance.Apply();
             }
         }
     }
 
     private void CreateTexture()
     {
-        _templateDirtMask = new Texture2D(_dirtMaskBase.width, _dirtMaskBase.height);
-        _templateDirtMask.SetPixels(_dirtMaskBase.GetPixels());
-        _templateDirtMask.Apply();
+        _dirtMaskInstance = new Texture2D(_dirtMaskBase.width, _dirtMaskBase.height, TextureFormat.RGBA32, false);
+        _dirtMaskInstance.SetPixels(_dirtMaskBase.GetPixels());
+        _dirtMaskInstance.Apply();
 
-        _material.SetTexture("DirtTexture", _templateDirtMask);
+        _materialInstance.SetTexture("_DirtMask", _dirtMaskInstance);
     }
 }

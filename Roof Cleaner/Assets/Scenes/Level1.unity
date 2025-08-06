@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.47221172, g: 0.8773517, b: 0.5980143, a: 1}
+  m_IndirectSpecularColor: {r: 0.47221166, g: 0.8773517, b: 0.5980143, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -10294,10 +10294,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb989ac69ed6a7e4aafefea27ccec747, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dirtMaskTextureBase: {fileID: 2800000, guid: d0a3f9bf0613865408dc3050cdbe3cea, type: 3}
-  _dirtBrush: {fileID: 2800000, guid: 2ac4802c57adaf349a3f95b058c94366, type: 3}
-  _material: {fileID: 2100000, guid: 9911ac537adcff24c84f040369b7a9d4, type: 2}
-  _uiText: {fileID: 1291501738}
 --- !u!4 &1605039773 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4912602655326222122, guid: c590bbbabd552174483b7d4f5ce697c6, type: 3}
